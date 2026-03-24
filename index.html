@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HTML/CSS Trainer 🎨</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0e0e;
+      --card: #1a1010;
+      --border: #3d1a00;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #f97316;
+      --accent2: #fb923c;
+      --header-bg: linear-gradient(135deg, #1a0d00, #2d1500);
+      --header-border: #7c2d12;
+      --sidebar-active: #2a1200;
+      --sidebar-hover: #1a0d00;
+      --panel-bg: #0d0a0a;
+      --editor-bg: #09080a;
+      --ex-icon-bg: #1e0d00;
+      --ex-icon-color: #f97316;
+      --ex-icon-border: #7c2d12;
+      --toolbar-bg: #0d0a0a;
+      --progress-track: #1e0d00;
+      --scrollbar-track: #0f0e0e;
+      --scrollbar-thumb: #3d1a00;
+    }
+
+    body.light {
+      --bg: #fff7ed;
+      --card: #ffffff;
+      --border: #fed7aa;
+      --text: #431407;
+      --muted: #9a3412;
+      --header-bg: linear-gradient(135deg, #ffedd5, #fed7aa);
+      --header-border: #fb923c;
+      --sidebar-active: #ffedd5;
+      --sidebar-hover: #fff7ed;
+      --panel-bg: #fff4e6;
+      --editor-bg: #fffaf5;
+      --ex-icon-bg: #ffedd5;
+      --ex-icon-color: #c2410c;
+      --ex-icon-border: #fb923c;
+      --toolbar-bg: #ffedd5;
+      --progress-track: #fed7aa;
+      --scrollbar-track: #fff7ed;
+      --scrollbar-thumb: #fb923c;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    header {
+      background: var(--header-bg);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--header-border);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .logo { font-size: 2rem; }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+    header p { font-size: 0.88rem; color: var(--accent); margin-top: 3px; }
+
+    .header-controls { display: flex; align-items: center; gap: 10px; }
+
+    .theme-toggle {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); }
+
+    .lang-toggle {
+      display: flex;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .lang-btn {
+      padding: 7px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .lang-btn.active { background: var(--accent); color: white; }
+
+    .progress-bar { height: 3px; background: var(--progress-track); }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.4s ease;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: calc(100vh - 91px);
+    }
+
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+    .sidebar-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      padding: 0 16px 12px;
+    }
+
+    .exercise-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .exercise-item:hover { background: var(--sidebar-hover); border-left-color: var(--accent); }
+    .exercise-item.active { background: var(--sidebar-active); border-left-color: var(--accent2); }
+
+    .ex-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      background: var(--ex-icon-bg);
+      color: var(--ex-icon-color);
+      border: 1px solid var(--ex-icon-border);
+    }
+    .exercise-item.done .ex-icon {
+      background: #1a3a2a;
+      color: #4ade80;
+      border-color: #166534;
+    }
+    .exercise-item.active .ex-icon {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent2);
+    }
+
+    .ex-info { flex: 1; min-width: 0; }
+    .ex-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .ex-level { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+    .badge-debutant { font-size: 0.65rem; padding: 2px 6px; border-radius: 999px; font-weight: 600; background: #1e3a5f; color: #60a5fa; }
+    .badge-intermediaire { font-size: 0.65rem; padding: 2px 6px; border-radius: 999px; font-weight: 600; background: #3b1f5e; color: #c084fc; }
+    .badge-avance { font-size: 0.65rem; padding: 2px 6px; border-radius: 999px; font-weight: 600; background: #5e1f1f; color: #f87171; }
+
+    /* ── Main layout ── */
+    .main {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    .exercise-header {
+      padding: 16px 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .exercise-header h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .exercise-header p { font-size: 0.88rem; color: var(--muted); line-height: 1.55; white-space: pre-line; }
+
+    .hint-box {
+      margin-top: 10px;
+      padding: 9px 13px;
+      background: #1e0d00;
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: var(--accent2);
+      display: none;
+      white-space: pre-line;
+    }
+    body.light .hint-box { background: #ffedd5; color: #c2410c; }
+
+    /* ── 3-column editor area ── */
+    .editor-zone {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+    }
+
+    .editor-col {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .editor-col:last-child { border-right: none; }
+
+    .panel-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: 7px 14px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-orange { background: var(--accent); }
+    .dot-blue { background: #3b82f6; }
+    .dot-green { background: #22c55e; }
+
+    .code-textarea {
+      flex: 1;
+      background: var(--editor-bg);
+      color: var(--text);
+      border: none;
+      padding: 14px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+      min-height: 0;
+    }
+    body.light .code-textarea { background: #fffaf5; color: #431407; }
+
+    .preview-frame {
+      flex: 1;
+      border: none;
+      background: white;
+      min-height: 0;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      padding: 10px 24px;
+      background: var(--toolbar-bg);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #btn-check { background: var(--accent); color: white; }
+    #btn-check:hover { background: var(--accent2); }
+    #btn-hint { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+    #btn-hint:hover { background: var(--sidebar-active); }
+    #btn-reset { background: transparent; color: var(--muted); border: 1px solid var(--border); margin-left: auto; }
+    #btn-reset:hover { color: var(--text); }
+
+    .status-msg {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+    .status-msg.ok { background: #166534; color: #86efac; display: inline-block; }
+    .status-msg.fail { background: #7f1d1d; color: #f87171; display: inline-block; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">🎨</div>
+    <div>
+      <h1>HTML/CSS Trainer</h1>
+      <p data-i18n="subtitle">Apprends HTML et CSS en codant directement dans le navigateur</p>
+    </div>
+  </div>
+  <div class="header-controls">
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">☀️</button>
+    <div class="lang-toggle">
+      <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">🇫🇷 FR</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
+    </div>
+  </div>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-title" data-i18n="exercises">Exercices</div>
+  </aside>
+
+  <div class="main">
+    <div class="exercise-header">
+      <h2 id="ex-title"></h2>
+      <p id="ex-description"></p>
+      <div class="hint-box" id="hint-box"></div>
+    </div>
+
+    <div class="editor-zone">
+      <div class="editor-col">
+        <div class="panel-label">
+          <span class="dot dot-orange"></span>
+          HTML
+        </div>
+        <textarea id="html-editor" class="code-textarea" spellcheck="false"></textarea>
+      </div>
+      <div class="editor-col">
+        <div class="panel-label">
+          <span class="dot dot-blue"></span>
+          CSS
+        </div>
+        <textarea id="css-editor" class="code-textarea" spellcheck="false"></textarea>
+      </div>
+      <div class="editor-col">
+        <div class="panel-label">
+          <span class="dot dot-green"></span>
+          <span data-i18n="preview">Preview / Aperçu</span>
+        </div>
+        <iframe id="preview-frame" class="preview-frame" sandbox="allow-scripts"></iframe>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button id="btn-check">✓ <span data-i18n="validate">Valider</span></button>
+      <button id="btn-hint">💡 <span data-i18n="hint">Indice</span></button>
+      <span class="status-msg" id="status-msg"></span>
+      <button id="btn-reset">↺ <span data-i18n="reset">Réinitialiser</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── i18n ────────────────────────────────────────────────────────────────────
+const I18N = {
+  fr: {
+    subtitle: 'Apprends HTML et CSS en codant directement dans le navigateur',
+    exercises: 'Exercices',
+    preview: 'Preview / Aperçu',
+    validate: 'Valider',
+    hint: 'Indice',
+    reset: 'Réinitialiser',
+    'msg-ok': '✓ Correct !',
+    'msg-fail': '✗ Pas encore...',
+    level: { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' }
+  },
+  en: {
+    subtitle: 'Learn HTML and CSS by coding directly in the browser',
+    exercises: 'Exercises',
+    preview: 'Preview / Aperçu',
+    validate: 'Validate',
+    hint: 'Hint',
+    reset: 'Reset',
+    'msg-ok': '✓ Correct!',
+    'msg-fail': '✗ Not yet...',
+    level: { debutant: 'Beginner', intermediaire: 'Intermediate', avance: 'Advanced' }
+  }
+};
+
+// ─── Exercises ───────────────────────────────────────────────────────────────
+const EXERCISES = [
+  {
+    id: 1, level: 'debutant',
+    name: { fr: 'Mon premier titre', en: 'My first heading' },
+    desc: {
+      fr: "Écris le code HTML pour afficher un titre principal avec le texte 'Bonjour le monde !'",
+      en: "Write the HTML code to display a main heading with the text 'Bonjour le monde !'"
+    },
+    hint: {
+      fr: "La balise h1 crée un titre principal : <h1>Ton texte</h1>",
+      en: "The h1 tag creates a main heading: <h1>Your text</h1>"
+    },
+    htmlStarter: '<!-- Écris ton code HTML ici -->',
+    cssStarter: '',
+    check: (doc) => doc.querySelector('h1') && doc.querySelector('h1').textContent.includes('Bonjour le monde')
+  },
+  {
+    id: 2, level: 'debutant',
+    name: { fr: 'Titre et paragraphe', en: 'Heading and paragraph' },
+    desc: {
+      fr: "Crée une page avec un titre h1 'Mon blog' et un paragraphe p avec n'importe quel texte.",
+      en: "Create a page with an h1 heading 'Mon blog' and a p paragraph with any text."
+    },
+    hint: {
+      fr: 'Utilise <h1> pour le titre et <p> pour le paragraphe.',
+      en: 'Use <h1> for the heading and <p> for the paragraph.'
+    },
+    htmlStarter: '<!-- Écris ton code HTML ici -->',
+    cssStarter: '',
+    check: (doc) => doc.querySelector('h1') && doc.querySelector('p') &&
+      doc.querySelector('h1').textContent.trim().length > 0 &&
+      doc.querySelector('p').textContent.trim().length > 0
+  },
+  {
+    id: 3, level: 'debutant',
+    name: { fr: 'Lien cliquable', en: 'Clickable link' },
+    desc: {
+      fr: "Crée un lien qui pointe vers 'https://google.com' avec le texte 'Aller sur Google'.",
+      en: "Create a link pointing to 'https://google.com' with the text 'Go to Google'."
+    },
+    hint: {
+      fr: "<a href='URL'>Texte du lien</a>",
+      en: "<a href='URL'>Link text</a>"
+    },
+    htmlStarter: '<!-- Crée ton lien ici -->',
+    cssStarter: '',
+    check: (doc) => { const a = doc.querySelector('a'); return a && a.href.includes('google.com'); }
+  },
+  {
+    id: 4, level: 'debutant',
+    name: { fr: 'Liste à puces', en: 'Bullet list' },
+    desc: {
+      fr: 'Crée une liste non ordonnée avec 3 fruits de ton choix.',
+      en: 'Create an unordered list with 3 fruits of your choice.'
+    },
+    hint: {
+      fr: '<ul> crée la liste, <li> crée chaque élément de la liste.',
+      en: '<ul> creates the list, <li> creates each list item.'
+    },
+    htmlStarter: '<ul>\n  <!-- Ajoute tes éléments ici -->\n</ul>',
+    cssStarter: '',
+    check: (doc) => doc.querySelectorAll('li').length >= 3
+  },
+  {
+    id: 5, level: 'debutant',
+    name: { fr: 'Couleur du texte', en: 'Text color' },
+    desc: {
+      fr: "Crée un paragraphe avec le texte 'CSS c'est super !' et rends-le rouge avec CSS.",
+      en: "Create a paragraph with the text 'CSS is awesome!' and make it red using CSS."
+    },
+    hint: {
+      fr: 'En CSS : p { color: red; } ou utilisez une couleur hexadécimale comme #ff0000',
+      en: 'In CSS: p { color: red; } or use a hex color like #ff0000'
+    },
+    htmlStarter: "<p>CSS c'est super !</p>",
+    cssStarter: 'p {\n  /* Ajoute la couleur ici */\n}',
+    check: (doc) => {
+      const p = doc.querySelector('p');
+      if (!p) return false;
+      const style = doc.defaultView.getComputedStyle(p);
+      const color = style.color;
+      return color === 'rgb(255, 0, 0)' || color.includes('255, 0, 0');
+    }
+  },
+  {
+    id: 6, level: 'debutant',
+    name: { fr: 'Classe CSS', en: 'CSS Class' },
+    desc: {
+      fr: "Donne la classe 'important' au deuxième paragraphe et style cette classe en bleu et gras.",
+      en: "Give the class 'important' to the second paragraph and style that class in blue and bold."
+    },
+    hint: {
+      fr: "En HTML : <p class='important'>...</p>  En CSS : .important { color: blue; font-weight: bold; }",
+      en: "In HTML: <p class='important'>...</p>  In CSS: .important { color: blue; font-weight: bold; }"
+    },
+    htmlStarter: '<p>Paragraphe normal</p>\n<p>Paragraphe important</p>',
+    cssStarter: '/* Style la classe .important */',
+    check: (doc) => {
+      const p = doc.querySelector('.important');
+      if (!p) return false;
+      const style = doc.defaultView.getComputedStyle(p);
+      return parseInt(style.fontWeight) >= 700 || style.fontWeight === 'bold';
+    }
+  },
+  {
+    id: 7, level: 'intermediaire',
+    name: { fr: 'Box model — padding et border', en: 'Box model — padding and border' },
+    desc: {
+      fr: "Ajoute au div : un padding de 20px, une bordure solide bleue de 2px et un border-radius de 8px.",
+      en: "Add to the div: 20px padding, a 2px solid blue border and 8px border-radius."
+    },
+    hint: {
+      fr: 'padding: 20px; border: 2px solid blue; border-radius: 8px;',
+      en: 'padding: 20px; border: 2px solid blue; border-radius: 8px;'
+    },
+    htmlStarter: "<div class='boite'>Contenu de la boîte</div>",
+    cssStarter: '.boite {\n  /* Ajoute padding, border et border-radius */\n}',
+    check: (doc) => {
+      const d = doc.querySelector('.boite');
+      if (!d) return false;
+      const s = doc.defaultView.getComputedStyle(d);
+      return parseInt(s.paddingTop) >= 16 && s.borderTopStyle === 'solid';
+    }
+  },
+  {
+    id: 8, level: 'intermediaire',
+    name: { fr: 'Flexbox — alignement horizontal', en: 'Flexbox — horizontal alignment' },
+    desc: {
+      fr: 'Utilise Flexbox pour mettre les 3 boîtes côte à côte avec un espace entre elles.',
+      en: 'Use Flexbox to place the 3 boxes side by side with space between them.'
+    },
+    hint: {
+      fr: '.conteneur { display: flex; gap: 10px; } — justify-content: space-between pour les espacer.',
+      en: '.conteneur { display: flex; gap: 10px; } — justify-content: space-between to space them out.'
+    },
+    htmlStarter: "<div class='conteneur'>\n  <div class='boite'>1</div>\n  <div class='boite'>2</div>\n  <div class='boite'>3</div>\n</div>",
+    cssStarter: ".boite { background: coral; padding: 20px; color: white; }\n.conteneur {\n  /* Ajoute display flex ici */\n}",
+    check: (doc) => {
+      const c = doc.querySelector('.conteneur');
+      if (!c) return false;
+      const s = doc.defaultView.getComputedStyle(c);
+      return s.display === 'flex';
+    }
+  },
+  {
+    id: 9, level: 'intermediaire',
+    name: { fr: 'Flexbox — centrer un élément', en: 'Flexbox — center an element' },
+    desc: {
+      fr: 'Centre la boîte parfaitement au milieu du conteneur (horizontalement ET verticalement).',
+      en: 'Center the box perfectly in the middle of the container (horizontally AND vertically).'
+    },
+    hint: {
+      fr: '.conteneur { display: flex; justify-content: center; align-items: center; height: 200px; }',
+      en: '.conteneur { display: flex; justify-content: center; align-items: center; height: 200px; }'
+    },
+    htmlStarter: "<div class='conteneur'>\n  <div class='boite'>Centré !</div>\n</div>",
+    cssStarter: ".conteneur {\n  height: 200px;\n  background: #1e1b4b;\n  /* Centre avec flexbox */\n}\n.boite {\n  background: coral;\n  padding: 20px;\n  color: white;\n  border-radius: 8px;\n}",
+    check: (doc) => {
+      const c = doc.querySelector('.conteneur');
+      if (!c) return false;
+      const s = doc.defaultView.getComputedStyle(c);
+      return s.display === 'flex' && s.justifyContent === 'center' && s.alignItems === 'center';
+    }
+  },
+  {
+    id: 10, level: 'avance',
+    name: { fr: 'CSS Grid — 2 colonnes', en: 'CSS Grid — 2 columns' },
+    desc: {
+      fr: 'Crée une grille de 2 colonnes égales avec 4 éléments et un gap de 16px entre eux.',
+      en: 'Create a 2-column equal grid with 4 elements and a 16px gap between them.'
+    },
+    hint: {
+      fr: '.grille { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }',
+      en: '.grille { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }'
+    },
+    htmlStarter: "<div class='grille'>\n  <div class='item'>1</div>\n  <div class='item'>2</div>\n  <div class='item'>3</div>\n  <div class='item'>4</div>\n</div>",
+    cssStarter: ".item { background: steelblue; padding: 24px; color: white; text-align: center; border-radius: 6px; }\n.grille {\n  /* Ajoute le grid ici */\n}",
+    check: (doc) => {
+      const g = doc.querySelector('.grille');
+      if (!g) return false;
+      const s = doc.defaultView.getComputedStyle(g);
+      return s.display === 'grid' &&
+        (s.gridTemplateColumns.includes('px') || s.gridTemplateColumns.includes('fr'));
+    }
+  },
+  {
+    id: 11, level: 'avance',
+    name: { fr: 'Animation hover', en: 'Hover animation' },
+    desc: {
+      fr: "Ajoute un effet hover au bouton : il doit changer de couleur et s'agrandir légèrement au survol.",
+      en: 'Add a hover effect to the button: it should change color and slightly grow on hover.'
+    },
+    hint: {
+      fr: "button:hover { background: #4f46e5; transform: scale(1.05); } N'oublie pas transition: all 0.2s;",
+      en: "button:hover { background: #4f46e5; transform: scale(1.05); } Don't forget transition: all 0.2s;"
+    },
+    htmlStarter: '<button class=\'mon-bouton\'>Clique-moi !</button>',
+    cssStarter: ".mon-bouton {\n  padding: 12px 24px;\n  background: #6366f1;\n  color: white;\n  border: none;\n  border-radius: 8px;\n  font-size: 1rem;\n  cursor: pointer;\n  transition: all 0.2s;\n}\n.mon-bouton:hover {\n  /* Ajoute l'effet hover */\n}",
+    check: (doc) => {
+      const style = Array.from(doc.querySelectorAll('style')).map(s => s.textContent).join('');
+      return style.includes(':hover') && (style.includes('transform') || style.includes('background') || style.includes('scale'));
+    }
+  },
+  {
+    id: 12, level: 'avance',
+    name: { fr: 'Media Query — Responsive', en: 'Media Query — Responsive' },
+    desc: {
+      fr: 'La grille affiche 3 colonnes sur grand écran.\nAjoute une media query pour passer à 1 colonne sous 600px de largeur.',
+      en: 'The grid shows 3 columns on large screens.\nAdd a media query to switch to 1 column below 600px width.'
+    },
+    hint: {
+      fr: '@media (max-width: 600px) { .grille { grid-template-columns: 1fr; } }',
+      en: '@media (max-width: 600px) { .grille { grid-template-columns: 1fr; } }'
+    },
+    htmlStarter: "<div class='grille'>\n  <div class='item'>A</div>\n  <div class='item'>B</div>\n  <div class='item'>C</div>\n</div>",
+    cssStarter: ".item { background: teal; padding: 24px; color: white; text-align: center; border-radius: 6px; }\n.grille {\n  display: grid;\n  grid-template-columns: 1fr 1fr 1fr;\n  gap: 12px;\n}\n/* Ajoute la media query ici */",
+    check: (doc) => {
+      const style = Array.from(doc.querySelectorAll('style')).map(s => s.textContent).join('');
+      return style.includes('@media') && style.includes('600px');
+    }
+  }
+];
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let lang = localStorage.getItem('lang') || 'fr';
+let theme = localStorage.getItem('htmlcss_theme') || 'dark';
+let currentId = 1;
+let done = new Set(JSON.parse(localStorage.getItem('htmlcss_done') || '[]'));
+let debounceTimer = null;
+
+// ─── Theme ───────────────────────────────────────────────────────────────────
+function applyTheme() {
+  if (theme === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('theme-toggle').textContent = '🌙';
+  } else {
+    document.body.classList.remove('light');
+    document.getElementById('theme-toggle').textContent = '☀️';
+  }
+  localStorage.setItem('htmlcss_theme', theme);
+}
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+});
+
+// ─── Language ────────────────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('lang', l);
+  document.getElementById('btn-fr').classList.toggle('active', l === 'fr');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (I18N[l][key]) el.textContent = I18N[l][key];
+  });
+  renderSidebar();
+  loadExercise(currentId);
+}
+
+// ─── Preview ─────────────────────────────────────────────────────────────────
+function updatePreview() {
+  const html = document.getElementById('html-editor').value;
+  const css = document.getElementById('css-editor').value;
+  const frame = document.getElementById('preview-frame');
+  frame.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${html}</body></html>`;
+}
+
+function schedulePreview() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(updatePreview, 500);
+}
+
+document.getElementById('html-editor').addEventListener('input', () => {
+  const id = currentId;
+  localStorage.setItem('htmlcss_html_' + id, document.getElementById('html-editor').value);
+  schedulePreview();
+});
+document.getElementById('css-editor').addEventListener('input', () => {
+  const id = currentId;
+  localStorage.setItem('htmlcss_css_' + id, document.getElementById('css-editor').value);
+  schedulePreview();
+});
+
+// Tab support
+['html-editor', 'css-editor'].forEach(edId => {
+  document.getElementById(edId).addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const ta = e.target;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = start + 2;
+    }
+  });
+});
+
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const titleDiv = sidebar.querySelector('.sidebar-title');
+  sidebar.innerHTML = '';
+  if (titleDiv) {
+    titleDiv.textContent = I18N[lang].exercises;
+    sidebar.appendChild(titleDiv);
+  }
+
+  EXERCISES.forEach(ex => {
+    const item = document.createElement('div');
+    item.className = 'exercise-item' + (done.has(ex.id) ? ' done' : '') + (ex.id === currentId ? ' active' : '');
+    item.innerHTML = `
+      <div class="ex-icon">${done.has(ex.id) ? '✓' : ex.id}</div>
+      <div class="ex-info">
+        <div class="ex-name">${ex.name[lang]}</div>
+        <div class="ex-level"><span class="badge-${ex.level}">${I18N[lang].level[ex.level]}</span></div>
+      </div>
+    `;
+    item.addEventListener('click', () => loadExercise(ex.id));
+    sidebar.appendChild(item);
+  });
+}
+
+// ─── Load exercise ────────────────────────────────────────────────────────────
+function loadExercise(id) {
+  currentId = id;
+  const ex = EXERCISES.find(e => e.id === id);
+  document.getElementById('ex-title').textContent = `${ex.id}. ${ex.name[lang]}`;
+  document.getElementById('ex-description').textContent = ex.desc[lang];
+  document.getElementById('hint-box').style.display = 'none';
+  document.getElementById('hint-box').textContent = ex.hint[lang];
+  document.getElementById('status-msg').className = 'status-msg';
+
+  const savedHtml = localStorage.getItem('htmlcss_html_' + id);
+  const savedCss = localStorage.getItem('htmlcss_css_' + id);
+  document.getElementById('html-editor').value = savedHtml !== null ? savedHtml : ex.htmlStarter;
+  document.getElementById('css-editor').value = savedCss !== null ? savedCss : ex.cssStarter;
+
+  document.querySelectorAll('.exercise-item').forEach((el, i) => {
+    const exId = EXERCISES[i].id;
+    el.classList.toggle('active', exId === id);
+  });
+
+  updateProgress();
+  updatePreview();
+}
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+function updateProgress() {
+  const pct = (done.size / EXERCISES.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ─── Validate ────────────────────────────────────────────────────────────────
+function validateExercise() {
+  const html = document.getElementById('html-editor').value;
+  const css = document.getElementById('css-editor').value;
+  const ex = EXERCISES.find(e => e.id === currentId);
+  const statusEl = document.getElementById('status-msg');
+
+  // Build srcdoc and inject into a temp iframe to check
+  const srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${html}</body></html>`;
+
+  const tempFrame = document.createElement('iframe');
+  tempFrame.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:800px;height:600px;';
+  tempFrame.setAttribute('sandbox', 'allow-scripts');
+  document.body.appendChild(tempFrame);
+
+  tempFrame.onload = () => {
+    try {
+      const doc = tempFrame.contentDocument;
+      const passed = ex.check(doc);
+      if (passed) {
+        statusEl.textContent = I18N[lang]['msg-ok'];
+        statusEl.className = 'status-msg ok';
+        done.add(currentId);
+        localStorage.setItem('htmlcss_done', JSON.stringify([...done]));
+        renderSidebar();
+        updateProgress();
+      } else {
+        statusEl.textContent = I18N[lang]['msg-fail'];
+        statusEl.className = 'status-msg fail';
+      }
+    } catch (e) {
+      statusEl.textContent = I18N[lang]['msg-fail'];
+      statusEl.className = 'status-msg fail';
+    }
+    document.body.removeChild(tempFrame);
+  };
+
+  tempFrame.srcdoc = srcdoc;
+}
+
+document.getElementById('btn-check').addEventListener('click', validateExercise);
+
+document.getElementById('btn-hint').addEventListener('click', () => {
+  const hintEl = document.getElementById('hint-box');
+  const ex = EXERCISES.find(e => e.id === currentId);
+  hintEl.textContent = ex.hint[lang];
+  hintEl.style.display = hintEl.style.display === 'none' || !hintEl.style.display ? 'block' : 'none';
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  const ex = EXERCISES.find(e => e.id === currentId);
+  document.getElementById('html-editor').value = ex.htmlStarter;
+  document.getElementById('css-editor').value = ex.cssStarter;
+  localStorage.removeItem('htmlcss_html_' + currentId);
+  localStorage.removeItem('htmlcss_css_' + currentId);
+  document.getElementById('status-msg').className = 'status-msg';
+  updatePreview();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+applyTheme();
+setLang(lang);
+renderSidebar();
+loadExercise(1);
+</script>
+</body>
+</html>
